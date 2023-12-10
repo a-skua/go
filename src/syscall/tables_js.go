@@ -7,6 +7,7 @@
 package syscall
 
 import "runtime"
+import "io"
 
 // These were originally used by Nacl, then later also used by
 // js/wasm. Now that they're only used by js/wasm, these numbers are
@@ -225,6 +226,8 @@ const (
 	ENOSHARE        Errno = 2052   /* No such host or network path */
 	ECASECLASH      Errno = 2053   /* Filename exists with different case */
 	EWOULDBLOCK     Errno = EAGAIN /* Operation would block */
+
+	EEOF Errno = 100_000 // io.EOF
 )
 
 // TODO: Auto-generate some day. (Hard-coded in binaries so not likely to change.)
@@ -342,6 +345,7 @@ var errorstr = [...]string{
 	ENMFILE:         "No more files",
 	ENOSHARE:        "No such host or network path",
 	ECASECLASH:      "Filename exists with different case",
+	EEOF:            "End of File",
 }
 
 // Do the interface allocations only once for common
@@ -364,6 +368,8 @@ func errnoErr(e Errno) error {
 		return errEINVAL
 	case ENOENT:
 		return errENOENT
+	case EEOF:
+		return io.EOF
 	}
 	return e
 }
@@ -491,4 +497,5 @@ var errnoByCode = map[string]Errno{
 	"ENOSHARE":        ENOSHARE,
 	"ECASECLASH":      ECASECLASH,
 	"EWOULDBLOCK":     EWOULDBLOCK,
+	"EEOF":            EEOF,
 }

@@ -1,0 +1,9 @@
+{
+  "tasks": {
+    "serve": "python3 -m http.server -d web/ 8080"
+  },
+  "fmt": {
+    "include": ["web/"],
+    "exclude": ["web/wasm_exec.js"]
+  }
+}

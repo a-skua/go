@@ -400,9 +400,6 @@ func Read(fd int, b []byte) (int, error) {
 
 	buf := uint8Array.New(len(b))
 	n, err := fsCall("read", fd, buf, 0, len(b), nil)
-	if err != nil {
-		return 0, err
-	}
 	js.CopyBytesToGo(b, buf)
 
 	n2 := n.Int()
