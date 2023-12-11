@@ -1,2 +1,4 @@
 go.wasm
 wasm_exec.js
+go.env
+/src
