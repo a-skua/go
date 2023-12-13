@@ -62,9 +62,18 @@ export const closeFd = (fd) => {
   fds[fd] = null;
 };
 
+function* inodeGenerator() {
+  let inode = 0;
+  while (true) {
+    yield inode += 1;
+  }
+}
+
+const inodeGen = inodeGenerator();
+
 export class File {
   dev = 0;
-  ino = 0;
+  ino = inodeGen.next().value;
   nlink = 0;
   uid = 0;
   gid = 0;
@@ -149,6 +158,12 @@ export class File {
     console.debug(`${this}`);
     for (const child of this._children.values()) {
       child.tree();
+    }
+  }
+
+  remove() {
+    if (this._parent) {
+      this._parent._children.delete(this._name);
     }
   }
 }

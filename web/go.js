@@ -493,6 +493,13 @@ func main() {
 }
 `.trim(),
     }),
+    new File(FileMode.File, "go.mod", {
+      text: `
+module sandbox
+
+go 1.21
+`.trim(),
+    }),
   ),
 );
 
@@ -510,6 +517,14 @@ const enosys = () => {
 const eeof = () => {
   const err = new Error("EOF");
   err.code = "EEOF";
+  return err;
+};
+
+// NOTE debug用途
+// このエラーコードを返すと、go側でpanicする
+const edebug = () => {
+  const err = new Error("debug");
+  err.code = "XXX";
   return err;
 };
 
@@ -579,12 +594,29 @@ globalThis.fs = {
     }
     callback(null, file.childNames());
   },
+  rmdir(path, callback) {
+    const file = stat(path);
+    if (file) {
+      if (!file.isDirectory()) {
+        callback(enosys());
+        return;
+      }
+      file.remove();
+    }
+    callback(null);
+  },
 };
 
 globalThis.process = {
   ...globalThis.process,
   cwd() {
     return getWorkingDirectory();
+  },
+};
+
+const syscall = {
+  flock(fd, operation) {
+    // OK
   },
 };
 
@@ -595,7 +627,10 @@ export default async function (...args) {
   const go = new Go();
   const instance = await WebAssembly.instantiate(
     wasmmod,
-    go.importObject,
+    {
+      syscall,
+      ...go.importObject,
+    },
   );
 
   go.env = env;
@@ -618,6 +653,15 @@ for (const [k, v] of Object.entries(globalThis.process)) {
   if (typeof v === "function") {
     globalThis.process[k] = ((f) => (...args) => {
       console.debug(`process.${k}(${args.join(", ")})`);
+      return f(...args);
+    })(v);
+  }
+}
+
+for (const [k, v] of Object.entries(syscall)) {
+  if (typeof v === "function") {
+    syscall[k] = ((f) => (...args) => {
+      console.debug(`syscall.${k}(${args.join(", ")})`);
       return f(...args);
     })(v);
   }
