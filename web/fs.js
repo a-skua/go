@@ -97,7 +97,8 @@ export class File {
       this.size = this._data.byteLength;
     } else {
       this._data = new Uint8Array();
-      this.size = 0;
+      // NOTE とりあえずダミーの値を入れておく
+      this.size = mode === FileMode.Directory ? 4096 : 0;
     }
   }
 

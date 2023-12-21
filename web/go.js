@@ -482,24 +482,12 @@ root.addChildren(
     ),
   ),
   new File(FileMode.Directory, "sandbox").addChildren(
-    new File(FileMode.File, "main.go", {
-      text: `
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("Hello, world!")
-}
-`.trim(),
-    }),
-    new File(FileMode.File, "go.mod", {
-      text: `
-module sandbox
-
-go 1.21
-`.trim(),
-    }),
+    await new File(FileMode.File, "main.go", {
+      url: new URL("main.go", import.meta.url),
+    }).fetch(),
+    await new File(FileMode.File, "go.mod", {
+      url: new URL("go.mod", import.meta.url),
+    }).fetch(),
   ),
 );
 
@@ -572,6 +560,10 @@ globalThis.fs = {
       callback(enosys());
       return;
     }
+
+    // // NOTE どのあたりのコードから呼ばれているのかわからないので，panicを起こしてtraceを見る
+    // if (path === "/usr/local/go/src/fmt") return callback(edebug());
+
     callback(null, file);
   },
   lstat(path, callback) {

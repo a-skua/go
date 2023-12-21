@@ -5,6 +5,10 @@ all: web/go.wasm web/wasm_exec.js web/go.env web/src
 build:
 	cd src; GOOS=js GOARCH=wasm ./make.bash
 
+.PHONY: wasi
+wasi:
+	cd src; GOOS=wasip1 GOARCH=wasm ./make.bash
+
 web/go.wasm: bin/js_wasm/go
 	cp $< $@
 
